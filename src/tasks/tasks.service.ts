@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from 'typeorm';
 import { Tasks } from "./entity/tasks.entity";
 import { CreateTasksDto, UpdateTasksDto, DeleteTasksDto } from "./dto/index";
-import { Errors, Messages, StatusCodes } from '../utils/index';
+import { Errors, Messages, StatusCodes } from '../common/utils/index';
 import { UsersService } from '../users/users.service';
 
 @Injectable()

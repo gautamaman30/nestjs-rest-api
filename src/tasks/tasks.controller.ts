@@ -2,7 +2,7 @@ import { Controller, Get, Post, Delete, Put, Req, Body, UsePipes, Param} from '@
 import { Request } from "express";
 import { TasksService } from './tasks.service';
 import { CreateTasksDto, UpdateTasksDto, DeleteTasksDto } from "./dto/index";
-import { ReqValidationPipe } from '../pipe/reqValidate.pipe';
+import { ReqValidationPipe } from '../common/pipe/reqValidate.pipe';
 import {createTaskSchema, deleteTaskSchema, getTaskById, getTasksByUsername, updateTasksSchema  } from './schema/index'
 
 @Controller('task')

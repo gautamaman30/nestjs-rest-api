@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { QueryFailedError, Repository } from 'typeorm';
 import { Users } from "./entity/users.entity";
 import { CreateUsersDto, GetUsersDto, UpdateUsersDto } from "./dto/index";
-import { Errors, Messages, StatusCodes } from '../utils/index'
+import { Errors, Messages, StatusCodes, helperFunctions } from '../common/utils/index';
 
 @Injectable()
 export class UsersService {
@@ -35,6 +35,11 @@ export class UsersService {
 
     async create(createUsersDto: CreateUsersDto) {
         try {
+            const hashedPassword = await helperFunctions.hashPassword(createUsersDto.password);
+            if(hashedPassword instanceof HttpException) {
+                return hashedPassword;
+            }
+            createUsersDto.password = hashedPassword;
             const result = await this.usersRepository.insert(createUsersDto);
             return {message: Messages.USER_CREATED_SUCCESSFULLY};
         } catch(err) {

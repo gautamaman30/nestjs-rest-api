@@ -1,6 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LoggerMiddleware, LowercaseReqKeysMiddleware } from './middleware/index'
+import { LoggerMiddleware, LowercaseReqKeysMiddleware } from './common/middleware/index'
 import { UsersModule } from './users/users.module';
 import { configObj } from './configEnv'
 import { Users } from './users/entity/users.entity'

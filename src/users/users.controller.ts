@@ -2,7 +2,7 @@ import { Controller, Get, Post, Delete, Put, Req, Body, UsePipes, Param} from '@
 import { Request } from "express";
 import { UsersService } from './users.service';
 import { CreateUsersDto, UpdateUsersDto } from "./dto/index";
-import { ReqValidationPipe } from '../pipe/reqValidate.pipe';
+import { ReqValidationPipe } from '../common/pipe/reqValidate.pipe';
 import { createUserSchema, getUsersByUsernameSchema, updateUserSchema, deleteUsersByUsernameSchema} from './schema/index'
 
 @Controller('user')
