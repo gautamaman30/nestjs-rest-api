@@ -16,6 +16,11 @@ export class Tasks {
     })
     content: string;
 
+    @Column({
+        length: 100
+    })
+    username: string;
+
     @ManyToOne(type => Users)
     @JoinColumn({
         name: "username",

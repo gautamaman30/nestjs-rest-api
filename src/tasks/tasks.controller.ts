@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Delete, Put, Req, Body, UsePipes, Param} from '@nestjs/common';
 import { Request } from "express";
 import { TasksService } from './tasks.service';
-import { CreateTasksDto, UpdateTasksDto } from "./dto/index";
+import { CreateTasksDto, UpdateTasksDto, DeleteTasksDto } from "./dto/index";
 import { ReqValidationPipe } from '../pipe/reqValidate.pipe';
 import {createTaskSchema, deleteTaskSchema, getTaskById, getTasksByUsername, updateTasksSchema  } from './schema/index'
 
@@ -34,8 +34,8 @@ export class TasksController {
 
     @Delete() 
     @UsePipes(new ReqValidationPipe(deleteTaskSchema))
-    async removeTaskByTaskname(@Body() id: number, @Body() username: string) {
-        return this.tasksService.remove(id, username);
+    async removeById(@Body() deleteTasksDto: DeleteTasksDto) {
+        return this.tasksService.remove(deleteTasksDto);
     }
 
     @Put()

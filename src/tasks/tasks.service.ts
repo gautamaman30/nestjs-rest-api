@@ -1,14 +1,15 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Tasks } from "./entity/tasks.entity";
-import { CreateTasksDto, UpdateTasksDto } from "./dto/index";
-import { Errors, Messages, StatusCodes } from '../utils/index'
+import { CreateTasksDto, UpdateTasksDto, DeleteTasksDto } from "./dto/index";
+import { Errors, Messages, StatusCodes } from '../utils/index';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class TasksService {
 
-    constructor(@InjectRepository(Tasks) private tasksRepository: Repository<Tasks>) {}
+    constructor(@InjectRepository(Tasks) private tasksRepository: Repository<Tasks>, private usersService: UsersService) {}
 
     async findAll() {
         try {
@@ -48,6 +49,10 @@ export class TasksService {
 
     async create(createTasksDto: CreateTasksDto) {
         try {
+            const user = await this.usersService.findByUsername(createTasksDto.username);
+            if(user instanceof HttpException) {
+                return user;
+            }
             const result = await this.tasksRepository.insert(createTasksDto);
             return {message: Messages.TASK_CREATED_SUCCESSFULLY, id: result.identifiers[0].id};
         } catch(err) {
@@ -56,16 +61,15 @@ export class TasksService {
         }
     }
 
-    async remove(id: number, username: string) {
+    async remove(deleteTasksDto: DeleteTasksDto) {
         try {   
-            let filter = {id, username};
-            const result = await this.tasksRepository.delete(filter);
+            const result = await this.tasksRepository.delete(deleteTasksDto);
+            if(result.affected === 0) {
+                return new HttpException(Errors.TASK_NOT_FOUND, StatusCodes.NOT_FOUND);
+            }
             return {message: Messages.TASK_DELETED_SUCCESSFULLY};
         } catch(err) {
             console.log(err.message);
-            if(err instanceof QueryFailedError) {
-                return new HttpException(err.message, StatusCodes.BAD_REQUEST);
-            }
             return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     }
@@ -81,13 +85,14 @@ export class TasksService {
             }
 
             let filter = {id: updateTasksDto.id, username: updateTasksDto.username};
-            const result = this.tasksRepository.update(filter, updateDoc);
-            return {message: Messages.TASK_UPDATED_SUCCESSFULLY}
+
+            const result = await this.tasksRepository.update(filter, updateDoc);
+            if(result.affected === 0) {
+                return new HttpException(Errors.TASK_NOT_FOUND, StatusCodes.NOT_FOUND);
+            }
+            return {message: Messages.TASK_UPDATED_SUCCESSFULLY};
         } catch(err) {
             console.log(err.message);
-            if(err instanceof QueryFailedError) {
-                return new HttpException(err.message, StatusCodes.BAD_REQUEST);
-            }
             return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     }
