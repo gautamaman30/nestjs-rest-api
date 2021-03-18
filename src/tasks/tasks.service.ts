@@ -72,9 +72,13 @@ export class TasksService {
 
     async update(updateTasksDto: UpdateTasksDto) {
         try {
-            let updateDoc;
+            let updateDoc: any = {};
             if(updateTasksDto.name) updateDoc.name = updateTasksDto.name;
             if(updateTasksDto.content) updateDoc.content = updateTasksDto.content;
+
+            if(Object.keys(updateDoc).length === 0) {
+                return new HttpException(Errors.TASK_UPDATE_FIELDS_REQUIRED, StatusCodes.BAD_REQUEST);  
+            }
 
             let filter = {id: updateTasksDto.id, username: updateTasksDto.username};
             const result = this.tasksRepository.update(filter, updateDoc);

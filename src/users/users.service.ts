@@ -48,31 +48,35 @@ export class UsersService {
 
     async remove(username: string) {
         try {
-            const result = await this.usersRepository.delete({username});
+            const result = await this.usersRepository.delete(username);
+            if(result.affected === 0) {
+                return new HttpException(Errors.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
+            }
             return {message: Messages.USER_DELETED_SUCCESSFULLY};
         } catch(err) {
             console.log(err.message);
-            if(err instanceof QueryFailedError) {
-                return new HttpException(Errors.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
-            }
             return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     }
 
     async update(updateUsersDto: UpdateUsersDto) {
         try {
-            let updateDoc;
+            let updateDoc: any = {};
             if(updateUsersDto.first_name) updateDoc.first_name = updateUsersDto.first_name;
             if(updateUsersDto.last_name) updateDoc.last_name = updateUsersDto.last_name;
             if(updateUsersDto.title) updateDoc.title = updateUsersDto.title;
 
-            const result = this.usersRepository.update({username: updateUsersDto.username}, updateDoc);
+            if(Object.keys(updateDoc).length === 0) {
+                return new HttpException(Errors.USER_UPDATE_FIELDS_REQUIRED, StatusCodes.BAD_REQUEST);  
+            }
+                
+            const result = await this.usersRepository.update({username: updateUsersDto.username}, updateDoc);
+            if(result.affected === 0) {
+                return new HttpException(Errors.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
+            }
             return {message: Messages.USER_UPDATED_SUCCESSFULLY}
         } catch(err) {
             console.log(err.message);
-            if(err instanceof QueryFailedError) {
-                return new HttpException(Errors.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
-            }
             return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     }

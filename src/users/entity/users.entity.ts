@@ -1,13 +1,14 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm"
+import { Entity, Column, PrimaryColumn} from "typeorm"
 
 @Entity()
 export class Users {
-    @PrimaryGeneratedColumn()
+    @Column({
+        generated: true
+    })
     id: number;
 
-    @Column({
+    @PrimaryColumn({
         length: 100,
-        unique: true
     })
     username: string;
 
