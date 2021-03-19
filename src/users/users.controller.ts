@@ -1,23 +1,23 @@
 import { Controller, Get, Post, Delete, Put, Req, Body, UsePipes, Param} from '@nestjs/common';
 import { Request } from "express";
 import { UsersService } from './users.service';
-import { CreateUsersDto, UpdateUsersDto } from "./dto/index";
+import { CreateUsersDto, UpdateUsersDto, LoginUsersDto } from "./dto/index";
 import { ReqValidationPipe } from '../common/pipe/reqValidate.pipe';
-import { createUserSchema, getUsersByUsernameSchema, updateUserSchema, deleteUsersByUsernameSchema} from './schema/index'
+import { createUserSchema, getUsersByUsernameSchema, updateUserSchema, deleteUsersSchema, loginUserSchema} from './schema/index'
 
 @Controller('user')
 export class UsersController {
     constructor(private usersService: UsersService) {}
 
     @Get()
-    async findAll(@Req() req: Request) {
-        return this.usersService.findAll();
+    async findUser(@Req() req: Request) {
+        return this.usersService.findByUsername(req.body.username);
     }
 
-    @Get(':username')
-    @UsePipes(new ReqValidationPipe(getUsersByUsernameSchema))
-    async findByUsername(@Param() username: string) {
-        return this.usersService.findByUsername(username);
+    @Post('login')
+    @UsePipes(new ReqValidationPipe(loginUserSchema))
+    async loginUser(@Body() loginUsersDto: LoginUsersDto) {
+        return this.usersService.loginUser(loginUsersDto);
     }
 
     @Post()
@@ -27,9 +27,8 @@ export class UsersController {
     }
 
     @Delete() 
-    @UsePipes(new ReqValidationPipe(deleteUsersByUsernameSchema))
-    async removeUserByUsername(@Body() username: string) {
-        return this.usersService.remove(username);
+    async removeUser(@Req() req: Request) {
+        return this.usersService.remove(req.body.username);
     }
 
     @Put()

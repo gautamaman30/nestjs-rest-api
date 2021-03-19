@@ -8,5 +8,7 @@ export const Errors =  Object.freeze({
     TASK_NOT_FOUND_USERNAME: 'No tasks found for this username',
     TASK_UPDATE_FIELDS_REQUIRED: 'Task update fields are required',
 
-    INTERNAL_ERROR: 'Internal server error'
+    INTERNAL_ERROR: 'Internal server error',
+    AUTHORIZATION_FAILED: 'Authorization failed',
+    INCORRECT_PASSWORD: 'Incorrect password'
 })

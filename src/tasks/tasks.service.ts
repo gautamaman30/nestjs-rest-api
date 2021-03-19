@@ -11,19 +11,14 @@ export class TasksService {
 
     constructor(@InjectRepository(Tasks) private tasksRepository: Repository<Tasks>, private usersService: UsersService) {}
 
-    async findAll() {
+    async findUserTasksById(id, username: string) {
         try {
-            const result = await this.tasksRepository.find();
-            return result;
-        } catch(err) {
-            console.log(err.message);
-            return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    async findById(id: number) {
-        try {
-            let result = await this.tasksRepository.findOne(id);
+            let result = await this.tasksRepository
+                .createQueryBuilder("tasks")
+                .innerJoinAndSelect('users','users','users.username = tasks.username')    
+                .where("tasks.id = :id", id)
+                .andWhere("tasks.username = :username", {username})
+                .getOne();
             if(!result) {
                 return new HttpException(Errors.TASK_NOT_FOUND_ID, StatusCodes.NOT_FOUND);
             }
@@ -34,10 +29,10 @@ export class TasksService {
         } 
     }
 
-    async findByUsername(username: string) {
+    async findUserTasks(username: string) {
         try {
-            let result = await this.tasksRepository.findOne(username);
-            if(!result) {
+            let result = await this.tasksRepository.find({username});
+            if(result.length === 0) {
                 return new HttpException(Errors.TASK_NOT_FOUND_USERNAME, StatusCodes.NOT_FOUND);
             }
             return result;

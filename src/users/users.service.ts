@@ -2,23 +2,13 @@ import { Injectable, HttpException } from '@nestjs/common';
 import { InjectRepository } from "@nestjs/typeorm";
 import { QueryFailedError, Repository } from 'typeorm';
 import { Users } from "./entity/users.entity";
-import { CreateUsersDto, GetUsersDto, UpdateUsersDto } from "./dto/index";
+import { CreateUsersDto, GetUsersDto, UpdateUsersDto, LoginUsersDto } from "./dto/index";
 import { Errors, Messages, StatusCodes, helperFunctions } from '../common/utils/index';
 
 @Injectable()
 export class UsersService {
 
     constructor(@InjectRepository(Users) private usersRepository: Repository<Users>) {}
-
-    async findAll() {
-        try {
-            let result = await this.usersRepository.find();
-            return result.map(item => new GetUsersDto(item));
-        } catch(err) {
-            console.log(err.message);
-            return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
-        }
-    }
 
     async findByUsername(username: string) {
         try {
@@ -41,12 +31,32 @@ export class UsersService {
             }
             createUsersDto.password = hashedPassword;
             const result = await this.usersRepository.insert(createUsersDto);
-            return {message: Messages.USER_CREATED_SUCCESSFULLY};
+
+            const token = await helperFunctions.signToken({username: createUsersDto.username});
+            return {message: Messages.USER_CREATED_SUCCESSFULLY, token};
         } catch(err) {
             console.log(err.message);
             if(err instanceof QueryFailedError) {
                 return new HttpException(Errors.USERNAME_ALREADY_EXISTS, StatusCodes.BAD_REQUEST);
             }
+            return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async loginUser(loginUsersDto: LoginUsersDto) {
+        try {
+            const user = await this.usersRepository.findOne({username: loginUsersDto.username});
+            if(!user) {
+                return new HttpException(Errors.USER_NOT_FOUND, StatusCodes.NOT_FOUND);
+            }
+            const result = await helperFunctions.comparePassword(loginUsersDto.password, user.password);
+            if(!result) {
+                return new HttpException(Errors.INCORRECT_PASSWORD, StatusCodes.BAD_REQUEST);
+            }
+            const token = await helperFunctions.signToken({username: loginUsersDto.username});
+            return {message: Messages.USER_LOGGED_IN_SUCCESSFULLY, token};
+        } catch(err) {
+            console.log(err.message);
             return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
         }
     }

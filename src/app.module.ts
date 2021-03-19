@@ -1,11 +1,11 @@
 import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { LoggerMiddleware, LowercaseReqKeysMiddleware } from './common/middleware/index'
+import { LoggerMiddleware, LowercaseReqKeysMiddleware, AuthMiddleware } from './common/middleware/index'
 import { UsersModule } from './users/users.module';
-import { configObj } from './configEnv'
-import { Users } from './users/entity/users.entity'
+import { configObj } from './common/configEnv';
+import { Users } from './users/entity/users.entity';
 import { TasksModule } from './tasks/tasks.module';
-import { Tasks } from './tasks/entity/tasks.entity'
+import { Tasks } from './tasks/entity/tasks.entity';
 
 @Module({
     imports: [UsersModule, TasksModule, TypeOrmModule.forRootAsync({
@@ -26,7 +26,15 @@ import { Tasks } from './tasks/entity/tasks.entity'
 })
 export class AppModule implements NestModule{
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(LoggerMiddleware).forRoutes({path: 'user', method: RequestMethod.ALL}, {path: 'task', method: RequestMethod.ALL});
-        consumer.apply(LowercaseReqKeysMiddleware).forRoutes({path: 'user', method: RequestMethod.ALL}, {path: 'task', method: RequestMethod.ALL});
+        consumer.apply(LowercaseReqKeysMiddleware)
+            .forRoutes({ path: 'user', method: RequestMethod.ALL}, {path: 'task', method: RequestMethod.ALL});
+        consumer.apply(LoggerMiddleware)
+            .forRoutes({path: 'user', method: RequestMethod.ALL}, {path: 'task', method: RequestMethod.ALL});
+        consumer.apply(AuthMiddleware)
+            .forRoutes({ path: 'user', method: RequestMethod.GET }, 
+                { path: 'user/:username', method: RequestMethod.GET }, 
+                { path: 'user', method: RequestMethod.DELETE }, 
+                { path: 'user', method: RequestMethod.PUT },
+                {path: 'task', method: RequestMethod.ALL});
     }
 }
