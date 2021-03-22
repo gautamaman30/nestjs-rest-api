@@ -1,6 +1,6 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import {hash, compare} from "bcrypt";
-import {Errors, StatusCodes} from "./index";
-import { HttpException } from '@nestjs/common';
+import {Errors} from "./index";
 import {sign, Secret} from 'jsonwebtoken'
 import {configObj} from '../configEnv';
 
@@ -13,7 +13,7 @@ export class HelperFunctions{
             if(hashedPassword) return hashedPassword;
         } catch(err){
             console.log(err.message);
-            return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
+            return new HttpException(Errors.INTERNAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -24,7 +24,7 @@ export class HelperFunctions{
             else return false;
         } catch(err){
             console.log(err.message);
-            return new HttpException(Errors.INTERNAL_ERROR, StatusCodes.INTERNAL_SERVER_ERROR);
+            return new HttpException(Errors.INTERNAL_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
